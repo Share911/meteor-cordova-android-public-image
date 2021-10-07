@@ -1,0 +1,22 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_REPO_NAME: "meteor-cordova-android"
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon Public ECR...
+      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -f ./base-image/Dockerfile -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG public.ecr.aws/c0q4v0s2/$IMAGE_REPO_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push public.ecr.aws/c0q4v0s2/$IMAGE_REPO_NAME:$IMAGE_TAG
